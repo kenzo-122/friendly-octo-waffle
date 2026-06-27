@@ -1,575 +1,768 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Gateway | Hitam Lighting</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xyrooo FX — Free REST API</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#07020f;
+    --bg-1:#0e0720;
+    --bg-2:#160b2e;
+    --line:rgba(178,134,255,0.16);
+    --line-strong:rgba(178,134,255,0.32);
+    --glow-500:#9333ea;
+    --glow-400:#b873f8;
+    --glow-300:#dcc2ff;
+    --glow-soft:rgba(147,51,234,0.35);
+    --text-0:#f4ecff;
+    --text-1:#b6a4d6;
+    --text-2:#7c6a99;
+    --success:#34d399;
+    --warning:#fbbf24;
+    --danger:#fb7185;
+    --radius-l:22px;
+    --radius-m:16px;
+    --radius-s:10px;
+    --maxw:600px;
+  }
+  [data-lighting="magenta"]{
+    --glow-500:#c026d3;
+    --glow-400:#ec6fec;
+    --glow-300:#f6d2fb;
+    --glow-soft:rgba(192,38,211,0.35);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg-0);
+    color:var(--text-0);
+    font-family:'Sora',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;}
+  }
 
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #0a0a0a;
-            color: #f0f0f0;
-            min-height: 100vh;
-            overflow-x: hidden;
-            background: radial-gradient(circle at 20% 30%, #1a1a2e 0%, #0a0a0a 50%);
-            position: relative;
-        }
+  /* ---------- ambient background ---------- */
+  .aurora{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(560px 420px at 18% -6%, var(--glow-soft), transparent 60%),
+      radial-gradient(480px 480px at 100% 30%, rgba(124,58,237,0.22), transparent 65%),
+      radial-gradient(620px 520px at 30% 95%, rgba(192,38,211,0.14), transparent 70%);
+    animation:auroraShift 16s ease-in-out infinite alternate;
+  }
+  @keyframes auroraShift{
+    0%{opacity:.75; filter:hue-rotate(0deg);}
+    100%{opacity:1; filter:hue-rotate(12deg);}
+  }
+  .grid-veil{
+    position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.35;
+    background-image:
+      repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 64px),
+      repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 64px);
+    mask-image:radial-gradient(680px 680px at 50% 0%, rgba(0,0,0,0.9), transparent 75%);
+  }
 
-        /* Efek lighting background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 10% 20%, rgba(0, 150, 255, 0.05) 0%, transparent 20%),
-                radial-gradient(circle at 90% 40%, rgba(100, 0, 255, 0.05) 0%, transparent 20%),
-                radial-gradient(circle at 50% 80%, rgba(255, 0, 150, 0.05) 0%, transparent 20%);
-            z-index: -1;
-        }
+  .page{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:0 18px 60px;}
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+  /* ---------- topbar ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;margin:0 -18px 8px;
+    background:rgba(7,2,15,0.78);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{
+    width:30px;height:30px;border-radius:9px;
+    background:linear-gradient(145deg,var(--glow-400),var(--glow-500));
+    box-shadow:0 0 18px var(--glow-soft);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Orbitron',sans-serif;font-weight:900;font-size:14px;color:#0a0212;
+  }
+  .brand-name{font-family:'Orbitron',sans-serif;font-weight:700;font-size:14px;letter-spacing:.06em;color:var(--text-0);}
+  .brand-name b{color:var(--glow-300);}
+  .topbar-actions{display:flex;align-items:center;gap:10px;}
+  .lighting-toggle{
+    display:flex;align-items:center;gap:7px;
+    border:1px solid var(--line-strong);border-radius:999px;
+    padding:5px 6px 5px 10px;background:var(--bg-1);cursor:pointer;
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--text-1);
+  }
+  .lighting-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 35% 30%, var(--glow-300), var(--glow-500));
+    box-shadow:0 0 10px var(--glow-soft);transition:transform .25s;
+  }
+  .icon-btn{
+    width:34px;height:34px;border-radius:10px;border:1px solid var(--line-strong);
+    background:var(--bg-1);display:flex;align-items:center;justify-content:center;
+    color:var(--text-1);cursor:pointer;transition:.2s;
+  }
+  .icon-btn:hover, .icon-btn:focus-visible{color:var(--text-0);border-color:var(--glow-400);box-shadow:0 0 12px var(--glow-soft);}
 
-        /* Header */
-        header {
-            text-align: center;
-            padding: 30px 0;
-            position: relative;
-        }
+  /* ---------- hero ---------- */
+  .hero{padding:38px 4px 14px;text-align:center;}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:7px;
+    border:1px solid var(--line-strong);border-radius:999px;
+    padding:6px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;
+    letter-spacing:.12em;color:var(--glow-300);background:rgba(147,51,234,0.08);
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);animation:blip 2s ease-in-out infinite;}
+  @keyframes blip{0%,100%{opacity:1;}50%{opacity:.35;}}
 
-        .logo-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+  .sigil{position:relative;width:168px;height:168px;margin:26px auto 8px;}
+  .sigil-glow{position:absolute;inset:0;border-radius:50%;
+    background:radial-gradient(circle, var(--glow-soft), transparent 68%);
+    filter:blur(2px);animation:pulseGlow 3.4s ease-in-out infinite;
+  }
+  @keyframes pulseGlow{0%,100%{transform:scale(0.92);opacity:.8;}50%{transform:scale(1.08);opacity:1;}}
+  .sigil svg{position:relative;z-index:1;}
+  .fox-eye{animation:eyeBlip 3.2s ease-in-out infinite;}
+  .fox-eye.delay{animation-delay:.15s;}
+  @keyframes eyeBlip{0%,100%{opacity:1;}48%{opacity:1;}50%{opacity:.15;}52%{opacity:1;}}
 
-        .logo {
-            height: 80px;
-            width: auto;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 150, 255, 0.7);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
+  h1.title{
+    font-family:'Orbitron',sans-serif;font-weight:900;font-size:38px;letter-spacing:.04em;
+    margin:10px 0 2px;color:var(--text-0);
+    text-shadow:0 0 22px var(--glow-soft), 0 0 2px var(--glow-300);
+  }
+  .title small{display:block;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:12px;
+    letter-spacing:.32em;color:var(--glow-300);margin-top:6px;}
+  .hero p.lede{max-width:420px;margin:16px auto 26px;color:var(--text-1);font-size:14.5px;line-height:1.65;}
 
-        .logo:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(0, 150, 255, 0.9);
-        }
+  .stat-strip{
+    display:flex;align-items:center;justify-content:center;gap:18px;
+    max-width:380px;margin:0 auto 26px;padding:14px 10px;
+    background:linear-gradient(180deg, rgba(178,134,255,0.07), transparent);
+    border:1px solid var(--line);border-radius:999px;
+  }
+  .stat-item{display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .stat-num{
+    font-family:'Orbitron',sans-serif;font-weight:700;font-size:17px;color:var(--glow-300);
+    text-shadow:0 0 14px var(--glow-soft);
+  }
+  .stat-num small{font-size:11px;font-weight:600;}
+  .stat-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--text-2);text-transform:uppercase;}
+  .stat-div{width:1px;height:26px;background:var(--line-strong);}
 
-        .title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.8rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #00b4d8, #0077b6, #90e0ef);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
-            margin-bottom: 10px;
-            letter-spacing: 2px;
-        }
+  .cta-row{display:flex;flex-direction:column;gap:10px;max-width:320px;margin:0 auto;}
+  .btn{
+    border:none;border-radius:var(--radius-s);padding:14px 18px;font-family:'Sora',sans-serif;
+    font-weight:600;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+    transition:transform .15s, box-shadow .2s;text-decoration:none;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn:focus-visible{outline:2px solid var(--glow-300);outline-offset:2px;}
+  .btn-primary{background:linear-gradient(120deg,var(--glow-400),var(--glow-500));color:#0a0212;
+    box-shadow:0 0 24px var(--glow-soft);}
+  .btn-primary:hover{box-shadow:0 0 34px var(--glow-soft);}
+  .btn-ghost{background:var(--bg-1);color:var(--text-0);border:1px solid var(--line-strong);}
+  .btn-ghost:hover{border-color:var(--glow-400);color:var(--glow-300);}
 
-        .subtitle {
-            font-size: 1.2rem;
-            color: #aaa;
-            margin-bottom: 30px;
-            letter-spacing: 1px;
-        }
+  /* ---------- section shell ---------- */
+  .section{margin-top:42px;}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;padding:0 2px;}
+  .section-head h2{
+    font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:.16em;font-weight:700;
+    color:var(--text-1);margin:0;
+  }
+  .section-head .tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-2);}
 
-        /* Konten Utama */
-        .content {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 40px;
-            margin-bottom: 40px;
-        }
+  .panel{
+    background:linear-gradient(180deg, var(--bg-1), var(--bg-2));
+    border:1px solid var(--line);border-radius:var(--radius-l);
+    box-shadow:0 0 0 1px rgba(255,255,255,0.015) inset, 0 18px 40px -28px var(--glow-soft);
+  }
 
-        /* Panel Pembayaran */
-        .payment-panel {
-            flex: 1;
-            min-width: 300px;
-            max-width: 500px;
-            background: rgba(20, 20, 30, 0.8);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(0, 150, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
+  /* ---------- status card ---------- */
+  .status-card{padding:18px 18px 8px;}
+  .status-head{display:flex;align-items:center;justify-content:space-between;}
+  .status-head .label{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:.14em;color:var(--text-0);}
+  .live-pip{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--success);}
+  .live-pip .dot{width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);animation:blip 2s ease-in-out infinite;}
+  .status-row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:13px 2px;border-top:1px solid var(--line);
+    font-size:13px;
+  }
+  .status-row .k{color:var(--text-2);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.08em;}
+  .status-row .v{font-family:'JetBrains Mono',monospace;color:var(--text-0);font-weight:500;}
+  .v.accent{color:var(--glow-300);}
+  .batt-wrap{display:flex;align-items:center;gap:8px;}
+  .batt-shell{width:34px;height:15px;border:1px solid var(--line-strong);border-radius:4px;position:relative;padding:2px;}
+  .batt-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--success),#6ee7b7);width:0%;transition:width .8s ease;}
 
-        .payment-panel::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #00b4d8, #0077b6, #90e0ef, #0077b6);
-            z-index: -1;
-            border-radius: 17px;
-            opacity: 0.3;
-        }
+  /* ---------- categories ---------- */
+  .cat-list{display:flex;flex-direction:column;gap:8px;}
+  .cat-row{
+    background:var(--bg-1);border:1px solid var(--line);border-radius:var(--radius-m);
+    overflow:hidden;
+  }
+  .cat-trigger{
+    width:100%;background:none;border:none;display:flex;align-items:center;gap:12px;
+    padding:13px 14px;cursor:pointer;color:var(--text-0);text-align:left;
+  }
+  .cat-trigger:focus-visible{outline:2px solid var(--glow-300);outline-offset:-2px;}
+  .cat-icon{
+    width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+    font-size:15px;flex-shrink:0;
+    background:radial-gradient(circle at 30% 25%, rgba(255,255,255,0.08), transparent 60%), var(--bg-2);
+    border:1px solid var(--line-strong);
+  }
+  .cat-name{font-family:'Orbitron',sans-serif;font-weight:600;font-size:13px;letter-spacing:.06em;flex:1;}
+  .cat-ep{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--glow-300);
+    background:rgba(147,51,234,0.12);border:1px solid var(--line-strong);
+    border-radius:999px;padding:3px 9px;flex-shrink:0;
+  }
+  .cat-chev{color:var(--text-2);transition:transform .25s;flex-shrink:0;}
+  .cat-row.open .cat-chev{transform:rotate(180deg);color:var(--glow-300);}
+  .cat-panel{max-height:0;overflow:hidden;transition:max-height .32s ease;}
+  .cat-row.open .cat-panel{max-height:340px;}
+  .cat-panel-in{
+    padding:4px 10px 12px 58px;display:flex;flex-direction:column;gap:2px;
+    max-height:320px;overflow-y:auto;
+  }
+  .cat-panel-in::-webkit-scrollbar{width:5px;}
+  .cat-panel-in::-webkit-scrollbar-track{background:transparent;}
+  .cat-panel-in::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:3px;}
+  .ep-line{
+    display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-1);
+    padding:6px 4px;border-radius:7px;
+  }
+  .ep-line:hover{background:rgba(178,134,255,0.06);}
+  .ep-method{
+    font-size:9px;font-weight:700;color:#0a0212;background:var(--glow-300);
+    border-radius:5px;padding:2px 6px;letter-spacing:.04em;flex-shrink:0;
+  }
+  .ep-path{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ep-copy{
+    flex-shrink:0;border:1px solid var(--line-strong);background:var(--bg-2);border-radius:7px;
+    width:26px;height:26px;font-size:11px;line-height:1;cursor:pointer;color:var(--text-1);
+    display:flex;align-items:center;justify-content:center;transition:.2s;
+  }
+  .ep-copy:hover, .ep-copy:focus-visible{border-color:var(--glow-400);color:var(--glow-300);box-shadow:0 0 10px var(--glow-soft);}
+  .ep-copy.copied{border-color:var(--success);color:var(--success);}
+  .ep-count-note{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-2);padding:6px 4px 2px;}
 
-        .payment-panel:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 100, 255, 0.3);
-        }
+  /* premium tiers for high-volume categories */
+  .cat-row.tier-mega{border-color:rgba(251,191,36,0.38);box-shadow:0 0 0 1px rgba(251,191,36,0.1) inset, 0 0 22px -14px rgba(251,191,36,0.6);}
+  .cat-row.tier-mega .cat-ep{
+    color:#1a1206;background:linear-gradient(120deg,#fde68a,#fbbf24);border-color:rgba(251,191,36,0.6);
+    font-weight:700;box-shadow:0 0 12px rgba(251,191,36,0.35);
+  }
+  .cat-row.tier-high .cat-ep{color:var(--glow-300);border-color:rgba(178,134,255,0.55);}
+  .tier-badge{font-size:10px;margin-right:1px;}
 
-        .panel-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.8rem;
-            margin-bottom: 25px;
-            color: #00b4d8;
-            text-align: center;
-            position: relative;
-            padding-bottom: 10px;
-        }
+  /* ---------- insights ---------- */
+  .top-endpoint{padding:16px;}
+  .te-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .te-title{display:flex;align-items:center;gap:8px;font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:.1em;color:var(--text-0);}
+  .seg{display:flex;background:var(--bg-2);border:1px solid var(--line-strong);border-radius:999px;padding:3px;gap:3px;}
+  .seg button{
+    border:none;background:none;color:var(--text-2);font-family:'Sora',sans-serif;font-size:11px;font-weight:600;
+    padding:6px 11px;border-radius:999px;cursor:pointer;transition:.2s;
+  }
+  .seg button.active{background:linear-gradient(120deg,var(--glow-400),var(--glow-500));color:#0a0212;}
+  .rank-row{display:flex;align-items:center;gap:10px;padding:8px 0;}
+  .rank-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-2);width:16px;}
+  .rank-bar-wrap{flex:1;}
+  .rank-path{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-0);margin-bottom:5px;display:flex;justify-content:space-between;}
+  .rank-path span.pct{color:var(--glow-300);}
+  .rank-bar{height:6px;border-radius:999px;background:var(--bg-2);overflow:hidden;}
+  .rank-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--glow-500),var(--glow-300));width:0%;transition:width .6s ease;}
 
-        .panel-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 25%;
-            width: 50%;
-            height: 2px;
-            background: linear-gradient(to right, transparent, #00b4d8, transparent);
-        }
+  .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+  .mini-card{
+    padding:16px 14px;display:flex;flex-direction:column;gap:8px;cursor:pointer;
+    transition:border-color .2s, box-shadow .2s;
+  }
+  .mini-card:hover{border-color:var(--glow-400);box-shadow:0 0 22px -8px var(--glow-soft);}
+  .mini-card .mc-icon{font-size:17px;}
+  .mini-card .mc-label{font-family:'Orbitron',sans-serif;font-size:11.5px;letter-spacing:.06em;color:var(--text-0);}
+  .mini-card .mc-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-2);}
 
-        /* Metode Pembayaran */
-        .payment-method {
-            margin-bottom: 25px;
-            padding: 20px;
-            background: rgba(10, 10, 20, 0.7);
-            border-radius: 10px;
-            border-left: 4px solid #00b4d8;
-            transition: all 0.3s;
-        }
+  .response-card{padding:16px;margin-top:10px;}
+  .response-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .response-head span{font-family:'Orbitron',sans-serif;font-size:11.5px;letter-spacing:.08em;color:var(--text-0);}
+  .response-head .status-pill{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--success);
+    background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.35);border-radius:6px;padding:2px 7px;}
+  pre.code-block{
+    margin:0;background:var(--bg-0);border:1px solid var(--line);border-radius:var(--radius-s);
+    padding:13px 14px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.7;
+    color:var(--text-1);overflow-x:auto;
+  }
+  pre.code-block .k2{color:var(--glow-300);} pre.code-block .s2{color:#a7f3d0;} pre.code-block .n2{color:#fcd34d;}
 
-        .payment-method:hover {
-            background: rgba(30, 30, 50, 0.7);
-            transform: translateX(5px);
-        }
+  /* ---------- generators ---------- */
+  .gen-card{display:flex;align-items:center;gap:14px;padding:16px;margin-bottom:10px;}
+  .gen-icon{
+    width:42px;height:42px;border-radius:11px;flex-shrink:0;font-size:18px;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(145deg,var(--bg-2),var(--bg-1));border:1px solid var(--line-strong);
+  }
+  .gen-body{flex:1;min-width:0;}
+  .gen-body .gt{font-family:'Orbitron',sans-serif;font-size:12.5px;letter-spacing:.04em;color:var(--text-0);margin-bottom:3px;}
+  .gen-body .gd{font-size:11.5px;color:var(--text-2);line-height:1.4;}
+  .gen-btn{
+    flex-shrink:0;border:none;border-radius:9px;padding:9px 12px;font-size:11px;font-weight:600;
+    background:linear-gradient(120deg,var(--glow-400),var(--glow-500));color:#0a0212;cursor:pointer;
+    box-shadow:0 0 14px var(--glow-soft);
+  }
 
-        .method-title {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            color: #90e0ef;
-            font-size: 1.3rem;
-        }
+  /* ---------- footer ---------- */
+  .foot-row{
+    display:flex;align-items:center;gap:12px;padding:15px 16px;margin-bottom:9px;cursor:pointer;
+    text-decoration:none;color:inherit;
+  }
+  .foot-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+    font-size:15px;background:var(--bg-2);border:1px solid var(--line-strong);flex-shrink:0;}
+  .foot-body .ft{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:.04em;color:var(--text-0);}
+  .foot-body .fd{font-size:11px;color:var(--text-2);margin-top:2px;}
+  .foot-arrow{margin-left:auto;color:var(--text-2);}
 
-        .method-title i {
-            margin-right: 15px;
-            font-size: 1.5rem;
-        }
+  .social-row{display:flex;gap:10px;justify-content:center;margin:22px 0 18px;}
+  .social-row a{
+    width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:var(--bg-1);border:1px solid var(--line-strong);color:var(--text-1);text-decoration:none;
+    transition:.2s;
+  }
+  .social-row a:hover{color:var(--glow-300);border-color:var(--glow-400);box-shadow:0 0 14px var(--glow-soft);}
 
-        .method-details {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+  .colophon{text-align:center;padding-top:8px;border-top:1px solid var(--line);}
+  .colophon .l1{font-family:'Orbitron',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;color:var(--glow-300);}
+  .colophon .l2{font-size:11px;color:var(--text-2);margin-top:6px;}
+  .colophon .l3{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-2);margin-top:10px;opacity:.7;}
 
-        .account-number {
-            font-family: 'Orbitron', monospace;
-            font-size: 1.4rem;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 12px 15px;
-            border-radius: 8px;
-            border: 1px solid rgba(0, 150, 255, 0.3);
-            letter-spacing: 1px;
-            transition: all 0.3s;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
+  /* ---------- toast ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translate(-50%,12px);
+    background:var(--bg-2);border:1px solid var(--glow-400);border-radius:999px;
+    padding:11px 18px;font-size:12.5px;color:var(--text-0);box-shadow:0 8px 30px -8px var(--glow-soft);
+    opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;z-index:50;white-space:nowrap;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0);}
 
-        .account-number::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 180, 216, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .account-number:hover {
-            background: rgba(0, 20, 40, 0.7);
-            border-color: #00b4d8;
-            box-shadow: 0 0 15px rgba(0, 180, 216, 0.3);
-        }
-
-        .account-number:hover::before {
-            left: 100%;
-        }
-
-        .copy-btn {
-            align-self: flex-start;
-            background: linear-gradient(to right, #00b4d8, #0077b6);
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
-            margin-top: 5px;
-            transition: all 0.3s;
-        }
-
-        .copy-btn:hover {
-            background: linear-gradient(to right, #0077b6, #00b4d8);
-            box-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
-        }
-
-        /* QR Code Panel */
-        .qris-panel {
-            flex: 1;
-            min-width: 300px;
-            max-width: 500px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(20, 20, 30, 0.8);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(0, 150, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .qris-panel::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #ff0055, #ff5500, #ff0055, #ff5500);
-            z-index: -1;
-            border-radius: 17px;
-            opacity: 0.3;
-        }
-
-        .qris-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.8rem;
-            margin-bottom: 25px;
-            color: #ff0055;
-            text-align: center;
-        }
-
-        .qris-image {
-            width: 250px;
-            height: 250px;
-            border-radius: 10px;
-            box-shadow: 0 0 25px rgba(255, 0, 85, 0.4);
-            margin-bottom: 25px;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .qris-image:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 35px rgba(255, 0, 85, 0.6);
-        }
-
-        .qris-desc {
-            text-align: center;
-            color: #ccc;
-            line-height: 1.6;
-            font-size: 1.1rem;
-        }
-
-        /* Panel Musik */
-        .music-panel {
-            width: 100%;
-            max-width: 1040px;
-            background: rgba(20, 20, 30, 0.8);
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(0, 150, 255, 0.2);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .music-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: #00d4a0;
-            display: flex;
-            align-items: center;
-        }
-
-        .music-title i {
-            margin-right: 15px;
-            font-size: 1.8rem;
-        }
-
-        .music-player {
-            width: 100%;
-            max-width: 600px;
-            height: 80px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.7);
-        }
-
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 30px 0;
-            border-top: 1px solid rgba(100, 100, 100, 0.2);
-            margin-top: 40px;
-            color: #888;
-            font-size: 0.9rem;
-        }
-
-        .instruction {
-            max-width: 800px;
-            margin: 0 auto 30px;
-            padding: 20px;
-            background: rgba(10, 10, 20, 0.7);
-            border-radius: 10px;
-            border: 1px solid rgba(0, 150, 255, 0.2);
-        }
-
-        .instruction h3 {
-            color: #00b4d8;
-            margin-bottom: 15px;
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        .instruction ol {
-            text-align: left;
-            padding-left: 20px;
-            line-height: 1.8;
-        }
-
-        /* Animasi */
-        @keyframes glow {
-            0%, 100% { opacity: 0.7; }
-            50% { opacity: 1; }
-        }
-
-        .glowing-text {
-            animation: glow 2s infinite;
-        }
-
-        /* Responsif */
-        @media (max-width: 768px) {
-            .content {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .payment-panel, .qris-panel {
-                width: 100%;
-            }
-            
-            .title {
-                font-size: 2.2rem;
-            }
-            
-            .account-number {
-                font-size: 1.2rem;
-            }
-        }
-
-        /* Notifikasi */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            background: rgba(20, 20, 30, 0.95);
-            border-left: 5px solid #00b4d8;
-            border-radius: 5px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            transform: translateX(150%);
-            transition: transform 0.5s;
-            max-width: 300px;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification i {
-            margin-right: 10px;
-            color: #00b4d8;
-        }
-    </style>
+  @media (min-width:640px){
+    .page{padding-left:0;padding-right:0;}
+  }
+</style>
 </head>
-<body>
-    <div class="container">
-        <header>
-            <div class="logo-container">
-                <img src="https://files.catbox.moe/82lvo0.jpeg" alt="Logo" class="logo">
-            </div>
-            <h1 class="title">PAYMENT GATEWAY</h1>
-            <p class="subtitle">Transfer pembayaran dengan metode di bawah ini</p>
-        </header>
+<body data-lighting="violet">
 
-        <div class="content">
-            <div class="payment-panel">
-                <h2 class="panel-title glowing-text">METODE PEMBAYARAN</h2>
-                
-                <div class="payment-method">
-                    <div class="method-title">
-                        <i class="fas fa-wallet"></i>
-                        <span>DANA</span>
-                    </div>
-                    <div class="method-details">
-                        <div class="account-number" id="dana-number">083851270439</div>
-                        <button class="copy-btn" data-number="083851270439">
-                            <i class="fas fa-copy"></i> Salin Nomor
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="payment-method">
-                    <div class="method-title">
-                        <i class="fab fa-google"></i>
-                        <span>GO-PAY</span>
-                    </div>
-                    <div class="method-details">
-                        <div class="account-number" id="gopay-number">083805385608</div>
-                        <button class="copy-btn" data-number="083805385608">
-                            <i class="fas fa-copy"></i> Salin Nomor
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="payment-method">
-                    <div class="method-title">
-                        <i class="fas fa-qrcode"></i>
-                        <span>QRIS (Semua E-Wallet)</span>
-                    </div>
-                    <div class="method-details">
-                        <p>Gunakan QR Code di samping untuk pembayaran via QRIS yang mendukung semua e-wallet (DANA, OVO, GoPay, LinkAja, dll).</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="qris-panel">
-                <h2 class="qris-title glowing-text">SCAN QRIS</h2>
-                <img src="https://files.catbox.moe/q0o63g.jpeg" alt="QRIS Code" class="qris-image">
-                <p class="qris-desc">Scan QR code di atas menggunakan aplikasi e-wallet Anda (DANA, OVO, GoPay, LinkAja, dll) untuk melakukan pembayaran.</p>
-            </div>
-        </div>
+<div class="aurora"></div>
+<div class="grid-veil"></div>
 
-        <div class="music-panel">
-            <h3 class="music-title">
-                <i class="fas fa-music"></i> BACKGROUND MUSIC
-            </h3>
-            <div class="music-player">
-                <iframe 
-                    width="100%" 
-                    height="80" 
-                    src="https://www.youtube.com/embed/hobJmk2qrkM?autoplay=1&loop=1&playlist=hobJmk2qrkM&controls=1&modestbranding=1" 
-                    title="YouTube video player" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen>
-                </iframe>
-            </div>
-        </div>
+<div class="page">
 
-        <div class="instruction">
-            <h3>Instruksi Pembayaran:</h3>
-            <ol>
-                <li>Pilih metode pembayaran yang Anda inginkan (DANA, GoPay, atau QRIS).</li>
-                <li>Salin nomor tujuan atau scan QR code menggunakan aplikasi e-wallet Anda.</li>
-                <li>Lakukan transfer sesuai dengan jumlah yang harus dibayarkan.</li>
-                <li>Simpan bukti transfer untuk konfirmasi pembayaran.</li>
-                <li>Setelah transfer, kirim bukti ke admin untuk verifikasi.</li>
-            </ol>
-        </div>
+  <!-- TOPBAR -->
+  <nav class="topbar">
+    <div class="brand">
+      <div class="brand-mark">X</div>
+      <div class="brand-name">XYROOO <b>FX</b></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="lighting-toggle" id="lightingToggle" aria-label="Toggle lighting color" title="Switch lighting">
+        <span class="lighting-dot" id="lightingDot"></span>
+        <span id="lightingLabel">VIOLET</span>
+      </button>
+      <a class="icon-btn" href="https://github.com/xyrooofx" target="_blank" rel="noopener" id="githubBtn" aria-label="View on GitHub">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2.2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0 0 23.5 12C23.5 5.7 18.3.5 12 .5Z"/></svg>
+      </a>
+    </div>
+  </nav>
 
-        <footer>
-            <p>© 2023 Payment Gateway | Hitam Lighting Theme</p>
-            <p>Hubungi admin jika mengalami kendala dalam pembayaran</p>
-        </footer>
+  <!-- HERO -->
+  <header class="hero">
+    <span class="eyebrow"><span class="dot"></span> FREE · NO KEY · NO LIMITS</span>
+
+    <div class="sigil" aria-hidden="true">
+      <div class="sigil-glow"></div>
+      <svg width="168" height="168" viewBox="0 0 168 168">
+        <circle cx="118" cy="42" r="15" fill="none" stroke="var(--glow-300)" stroke-width="2" opacity="0.85" style="filter:drop-shadow(0 0 6px var(--glow-soft));"/>
+        <circle cx="123" cy="38" r="15" fill="var(--bg-0)"/>
+        <g style="filter:drop-shadow(0 0 10px var(--glow-soft));">
+          <path d="M84 132c-26 0-40-13-40-30 0-9 4-16 4-16l-10-20 18 7c7-4 16-6 28-6s21 2 28 6l18-7-10 20s4 7 4 16c0 17-14 30-40 30Z" fill="#150a26" stroke="var(--glow-400)" stroke-width="1.4"/>
+          <path d="M50 90 36 70l16 6Z" fill="#150a26" stroke="var(--glow-400)" stroke-width="1.4"/>
+          <path d="M118 90l14-20-16 6Z" fill="#150a26" stroke="var(--glow-400)" stroke-width="1.4"/>
+          <circle class="fox-eye" cx="70" cy="100" r="3.4" fill="var(--glow-300)"/>
+          <circle class="fox-eye delay" cx="98" cy="100" r="3.4" fill="var(--glow-300)"/>
+        </g>
+      </svg>
     </div>
 
-    <div class="notification" id="notification">
-        <i class="fas fa-check-circle"></i>
-        <span id="notification-text">Nomor berhasil disalin!</span>
+    <h1 class="title">XYROOO FX<small>FREE REST API · SOFTWARE INTERFACE</small></h1>
+    <p class="lede">A free REST API playground for developers — fast endpoints, no signup walls, no rate-limit anxiety. Built with Node.js, wrapped in violet light.</p>
+
+    <div class="stat-strip">
+      <div class="stat-item"><span class="stat-num" id="heroEpTotal">0</span><span class="stat-lbl">Endpoints</span></div>
+      <span class="stat-div"></span>
+      <div class="stat-item"><span class="stat-num" id="heroCatTotal">0</span><span class="stat-lbl">Categories</span></div>
+      <span class="stat-div"></span>
+      <div class="stat-item"><span class="stat-num">99.9<small>%</small></span><span class="stat-lbl">Uptime</span></div>
     </div>
 
-    <script>
-        // Fungsi untuk menyalin nomor ke clipboard
-        document.querySelectorAll('.copy-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const number = this.getAttribute('data-number');
-                navigator.clipboard.writeText(number).then(() => {
-                    showNotification(`Nomor ${number} berhasil disalin ke clipboard!`);
-                }).catch(err => {
-                    console.error('Gagal menyalin: ', err);
-                    showNotification('Gagal menyalin nomor. Silakan salin manual.');
-                });
-            });
-        });
+    <div class="cta-row">
+      <button class="btn btn-primary" id="readDocsBtn">📖 Read the Docs</button>
+      <a class="btn btn-ghost" href="https://github.com/xyrooofx" target="_blank" rel="noopener">View on GitHub</a>
+    </div>
+  </header>
 
-        // Fungsi untuk menampilkan notifikasi
-        function showNotification(message) {
-            const notification = document.getElementById('notification');
-            const notificationText = document.getElementById('notification-text');
-            
-            notificationText.textContent = message;
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
+  <!-- SERVER STATUS -->
+  <section class="section">
+    <div class="section-head"><h2>SERVER STATUS</h2></div>
+    <div class="panel status-card">
+      <div class="status-head">
+        <span class="label">LIVE</span>
+        <span class="live-pip"><span class="dot"></span> ONLINE</span>
+      </div>
+      <div class="status-row"><span class="k">LOCAL TIME</span><span class="v accent" id="clockTime">--:--:--</span></div>
+      <div class="status-row"><span class="k">DATE</span><span class="v" id="clockDate">—</span></div>
+      <div class="status-row"><span class="k">VISITORS TODAY</span><span class="v accent" id="visitorCount">0</span></div>
+      <div class="status-row"><span class="k">YOUR IP</span><span class="v" id="yourIp">resolving…</span></div>
+      <div class="status-row"><span class="k">YOUR BATTERY</span>
+        <span class="v batt-wrap"><span id="battPct">—</span><span class="batt-shell"><span class="batt-fill" id="battFill"></span></span></span>
+      </div>
+    </div>
+  </section>
 
-        // Efek hover pada nomor akun (bisa juga diklik untuk menyalin)
-        document.querySelectorAll('.account-number').forEach(element => {
-            element.addEventListener('click', function() {
-                const number = this.textContent;
-                navigator.clipboard.writeText(number).then(() => {
-                    showNotification(`Nomor ${number} berhasil disalin!`);
-                }).catch(err => {
-                    console.error('Gagal menyalin: ', err);
-                });
-            });
-        });
+  <!-- ENDPOINTS / CATEGORIES -->
+  <section class="section" id="endpoints">
+    <div class="section-head"><h2>ENDPOINTS</h2><span class="tag" id="catSectionTag">— categories</span></div>
+    <div class="cat-list" id="catList"></div>
+  </section>
 
-        // Efek untuk logo saat dimuat
-        window.addEventListener('load', function() {
-            const logo = document.querySelector('.logo');
-            logo.style.transform = 'scale(1.05)';
-            setTimeout(() => {
-                logo.style.transform = 'scale(1)';
-            }, 500);
-        });
-    </script>
+  <!-- INSIGHTS -->
+  <section class="section">
+    <div class="section-head"><h2>INSIGHTS &amp; MONITOR</h2></div>
+
+    <div class="panel top-endpoint">
+      <div class="te-head">
+        <div class="te-title">🔥 TOP ENDPOINT</div>
+        <div class="seg">
+          <button class="active" data-range="week">This Week</button>
+          <button data-range="month">This Month</button>
+        </div>
+      </div>
+      <div id="rankList"></div>
+    </div>
+
+    <div class="mini-grid">
+      <div class="panel mini-card" data-toast="Statistik dashboard isn't wired up yet.">
+        <div class="mc-icon">📊</div><div class="mc-label">STATISTIK</div><div class="mc-sub">requests / day</div>
+      </div>
+      <div class="panel mini-card" data-toast="Traffic graph isn't wired up yet.">
+        <div class="mc-icon">📈</div><div class="mc-label">TRAFFIC</div><div class="mc-sub">live bandwidth</div>
+      </div>
+      <div class="panel mini-card" data-toast="Runtime metrics aren't wired up yet.">
+        <div class="mc-icon">🖥️</div><div class="mc-label">RUNTIME</div><div class="mc-sub">node v20 · uptime</div>
+      </div>
+      <div class="panel mini-card" data-toast="Error log isn't wired up yet.">
+        <div class="mc-icon">⚠️</div><div class="mc-label">ERROR LOG</div><div class="mc-sub">last 24h</div>
+      </div>
+    </div>
+
+    <div class="panel response-card">
+      <div class="response-head"><span>RESPONSE INFO</span><span class="status-pill">200 OK</span></div>
+      <pre class="code-block">{
+  <span class="k2">"status"</span>: <span class="n2">200</span>,
+  <span class="k2">"creator"</span>: <span class="s2">"Xyrooo FX"</span>,
+  <span class="k2">"result"</span>: <span class="s2">"…"</span>
+}</pre>
+    </div>
+  </section>
+
+  <!-- TOOLS / GENERATORS -->
+  <section class="section">
+    <div class="section-head"><h2>QUICK TOOLS</h2></div>
+    <div class="gen-card panel">
+      <div class="gen-icon">▦</div>
+      <div class="gen-body"><div class="gt">QRIS Generator</div><div class="gd">Generate a dynamic QRIS code for any nominal amount.</div></div>
+      <button class="gen-btn" data-toast="Generator demo only — no backend connected.">Open</button>
+    </div>
+    <div class="gen-card panel">
+      <div class="gen-icon">{ }</div>
+      <div class="gen-body"><div class="gt">Code → Image</div><div class="gd">Turn a snippet or terminal output into a shareable image.</div></div>
+      <button class="gen-btn" data-toast="Generator demo only — no backend connected.">Open</button>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <section class="section">
+    <div class="section-head"><h2>SUPPORT</h2></div>
+    <a class="foot-row panel" href="mailto:hello@xyrooofx.dev?subject=Feedback%20%E2%80%93%20Xyrooo%20FX">
+      <div class="foot-icon">💬</div>
+      <div class="foot-body"><div class="ft">FEEDBACK</div><div class="fd">Bug report / feature request</div></div>
+      <span class="foot-arrow">→</span>
+    </a>
+    <a class="foot-row panel" href="https://wa.me/6281234567890?text=Hi%20Xyrooo%20FX%2C%20I%27d%20like%20an%20update" target="_blank" rel="noopener">
+      <div class="foot-icon">📡</div>
+      <div class="foot-body"><div class="ft">UPDATE CHANNEL</div><div class="fd">Endpoint changes &amp; maintenance alerts</div></div>
+      <span class="foot-arrow">→</span>
+    </a>
+
+    <div class="social-row">
+      <a href="https://github.com/xyrooofx" target="_blank" rel="noopener" aria-label="GitHub">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2.2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0 0 23.5 12C23.5 5.7 18.3.5 12 .5Z"/></svg>
+      </a>
+      <a href="https://wa.me/6281234567890" target="_blank" rel="noopener" aria-label="WhatsApp">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .6C5.8.6.8 5.6.8 11.8c0 2.2.6 4.2 1.7 6L.7 23.4l5.8-1.7a11 11 0 0 0 5.5 1.5c6.2 0 11.2-5 11.2-11.2C23.2 5.8 18.2.6 12 .6Zm0 20.3a9 9 0 0 1-4.6-1.3l-.3-.2-3.4 1 1-3.3-.2-.3a9 9 0 1 1 7.5 4.1Zm5-6.7c-.3-.1-1.6-.8-1.9-.9-.2-.1-.4-.1-.6.1-.2.2-.6.9-.8 1-.1.2-.3.2-.5.1-1.4-.7-2.3-1.2-3.3-2.7-.2-.3 0-.5.1-.6l.5-.6c.1-.2.1-.4 0-.5-.1-.2-.6-1.5-.8-2-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.4-.2.2-.9 1-.9 2.3 0 1.3 1 2.6 1.1 2.8.1.2 1.8 2.9 4.5 4 2.7 1 2.7.7 3.2.7.5 0 1.6-.6 1.8-1.2.2-.6.2-1.1.1-1.2-.1-.2-.2-.2-.4-.3Z"/></svg>
+      </a>
+      <a href="https://instagram.com/xyrooofx" target="_blank" rel="noopener" aria-label="Instagram">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2 0 1.9.2 2.3.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1.1.4 2.3.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c0 1.2-.2 1.9-.4 2.3-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1.1.4-2.3.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2 0-1.9-.2-2.3-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1.1-.4-2.3-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c0-1.2.2-1.9.4-2.3.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1.1-.4 2.3-.4 1.3-.1 1.7-.1 4.9-.1ZM12 0C8.7 0 8.3 0 7 .1c-1.4.1-2.3.3-3.1.6-.9.3-1.6.8-2.3 1.5C.9 2.9.4 3.6.1 4.5c-.3.8-.5 1.7-.6 3.1C0 8.7 0 9.1 0 12.4s0 3.7.1 5c.1 1.4.3 2.3.6 3.1.3.9.8 1.6 1.5 2.3.7.7 1.4 1.2 2.3 1.5.8.3 1.7.5 3.1.6 1.3.1 1.7.1 5 .1s3.7 0 5-.1c1.4-.1 2.3-.3 3.1-.6.9-.3 1.6-.8 2.3-1.5.7-.7 1.2-1.4 1.5-2.3.3-.8.5-1.7.6-3.1.1-1.3.1-1.7.1-5s0-3.7-.1-5c-.1-1.4-.3-2.3-.6-3.1-.3-.9-.8-1.6-1.5-2.3C21.1.9 20.4.4 19.5.1c-.8-.3-1.7-.5-3.1-.6C15.1 0 14.7 0 12 0Zm0 5.8a6.2 6.2 0 1 0 0 12.4 6.2 6.2 0 0 0 0-12.4Zm0 10.2a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.4-10.4a1.4 1.4 0 1 1-2.8 0 1.4 1.4 0 0 1 2.8 0Z"/></svg>
+      </a>
+    </div>
+
+    <div class="colophon">
+      <div class="l1">XYROOO FX</div>
+      <div class="l2">Free. No key. No nonsense.</div>
+      <div class="l3">© 2026 Xyrooo FX — ideas don't ship themselves.</div>
+    </div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  // ---------- lighting toggle ----------
+  var body = document.body;
+  var toggle = document.getElementById('lightingToggle');
+  var label = document.getElementById('lightingLabel');
+  toggle.addEventListener('click', function(){
+    var cur = body.getAttribute('data-lighting');
+    var next = cur === 'violet' ? 'magenta' : 'violet';
+    body.setAttribute('data-lighting', next);
+    label.textContent = next.toUpperCase();
+  });
+
+  // ---------- toast ----------
+  var toastEl = document.getElementById('toast');
+  var toastTimer;
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2200);
+  }
+  document.querySelectorAll('[data-toast]').forEach(function(el){
+    el.addEventListener('click', function(e){
+      e.preventDefault();
+      showToast(el.getAttribute('data-toast'));
+    });
+  });
+  document.getElementById('readDocsBtn').addEventListener('click', function(){
+    document.getElementById('endpoints').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  // ---------- live clock ----------
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function tickClock(){
+    var d = new Date();
+    document.getElementById('clockTime').textContent = pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('clockDate').textContent = d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  // ---------- visitor counter ----------
+  (function(){
+    var target = 4821 + Math.floor(Math.random()*900);
+    var el = document.getElementById('visitorCount');
+    var start = null;
+    var duration = 1100;
+    function step(ts){
+      if(!start) start = ts;
+      var p = Math.min(1, (ts-start)/duration);
+      el.textContent = Math.floor(p*target).toLocaleString();
+      if(p<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  })();
+
+  // ---------- IP lookup (best effort) ----------
+  fetch('https://api.ipify.org?format=json').then(function(r){return r.json();})
+    .then(function(data){ document.getElementById('yourIp').textContent = data.ip; })
+    .catch(function(){ document.getElementById('yourIp').textContent = 'hidden'; });
+
+  // ---------- battery (best effort) ----------
+  if (navigator.getBattery) {
+    navigator.getBattery().then(function(b){
+      function render(){
+        var pct = Math.round(b.level*100);
+        document.getElementById('battPct').textContent = pct+'%';
+        document.getElementById('battFill').style.width = pct+'%';
+      }
+      render();
+      b.addEventListener('levelchange', render);
+    }).catch(function(){ document.getElementById('battPct').textContent='—'; });
+  } else {
+    document.getElementById('battPct').textContent = '—';
+  }
+
+  // ---------- categories ----------
+  // combo() builds realistic endpoint paths from two word-lists so every
+  // category can list its FULL endpoint set (no "+N more" hiding).
+  function combo(prefix, listA, listB, count, sep){
+    var out = [];
+    for (var i=0; i<listA.length && out.length<count; i++){
+      for (var j=0; j<listB.length && out.length<count; j++){
+        out.push('/'+prefix+'/'+listA[i]+sep+listB[j]);
+      }
+    }
+    return out;
+  }
+  function direct(prefix, names){ return names.map(function(n){ return '/'+prefix+'/'+n; }); }
+
+  var categories = [
+    { icon:'🔧', name:'TOOLS', eps: combo('tools',
+        ['shorten','convert','compress','resize','generate','validate','extract','merge','split','encode','decode','scan','hash','translate','format'],
+        ['url','text','image','pdf','json','qrcode','color','file','csv','html'], 134, '-') },
+    { icon:'🧠', name:'AI', eps: combo('ai',
+        ['chat','generate','remove-bg','upscale','caption','summarize','translate','classify','detect','transcribe','enhance'],
+        ['image','text','photo','document','audio','video','code','face','object','scene','prompt'], 121, '-') },
+    { icon:'📚', name:'LIBRARY', eps: combo('library',
+        ['quotes','anime','wallpaper','manga','novel','comic','poetry','fact'],
+        ['love','motivation','life','friendship','nature','space','horror','romance','fantasy','sci-fi','history','mythology','sports','music'], 112, '/') },
+    { icon:'🎨', name:'MAKER', eps: combo('maker',
+        ['welcome-card','quote-image','brat','ttp','meme-card','certificate','id-card','sticker','banner','avatar'],
+        ['dark','light','neon','minimal','retro','gradient','glass','vintage','cyber','pastel'], 95, '-') },
+    { icon:'⬇️', name:'DOWNLOAD', eps: combo('download',
+        ['tiktok','instagram','youtube','spotify','twitter','facebook','soundcloud','pinterest','threads','telegram','reddit'],
+        ['video','audio','image','story','reel','post','mp3','mp4'], 88, '/') },
+    { icon:'🔍', name:'SEARCH', eps: combo('search',
+        ['lyrics','anime','manga','movie','pinterest','npm','github','stackoverflow','wikipedia','dictionary','synonym','recipe','game','book','podcast','song','artist','album','playlist'],
+        ['basic','advanced','trending','related'], 76, '-') },
+    { icon:'🎲', name:'RANDOM', eps: combo('random',
+        ['fact','joke','advice','quote','meme','word','number','color','emoji'],
+        ['daily','funny','dark','wholesome','short','long'], 54, '-') },
+    { icon:'🎮', name:'FUN', eps: combo('fun',
+        ['truth-or-dare','meme','rate','ship','quiz','poll','dare','compliment'],
+        ['random','daily','spicy','wholesome','duo','group'], 47, '-') },
+    { icon:'📰', name:'NEWS', eps: combo('news',
+        ['tech','sport','business','entertainment','health','politics','science','world'],
+        ['global','local','asia','europe','americas'], 38, '-') },
+    { icon:'👁️', name:'STALK', eps: combo('stalk',
+        ['instagram','tiktok','github','spotify','twitter','threads'],
+        ['profile','followers','posts','bio','stats'], 29, '/') },
+    { icon:'🛡️', name:'ADMIN', eps: direct('admin', ['stats','restart','logs','broadcast','ban-user','unban-user','clear-cache','set-maintenance','create-key','revoke-key','list-keys','update-config','backup-db','restore-db','view-errors','kill-process','reload-routes','set-rate-limit','health-check']) },
+    { icon:'🗄️', name:'CACHE', eps: direct('cache', ['clear','status','warm','flush-user','flush-route','size','keys','ttl-get','ttl-set','invalidate','stats','rebuild','purge-expired']) },
+    { icon:'🏆', name:'LEADERBOARD', eps: direct('leaderboard', ['top-users','top-endpoints','top-contributors','top-countries','top-referrers','weekly-rank','monthly-rank']) }
+  ];
+  categories.forEach(function(c){ c.ep = c.eps.length; });
+
+  var catList = document.getElementById('catList');
+  var totalEp = categories.reduce(function(sum, c){ return sum + c.ep; }, 0);
+
+  function tierOf(ep){ return ep >= 80 ? 'mega' : (ep >= 30 ? 'high' : 'standard'); }
+
+  function copyText(text, btn){
+    function done(ok){
+      var prev = btn.textContent;
+      btn.textContent = ok ? '✅' : '⚠️';
+      btn.classList.add('copied');
+      setTimeout(function(){ btn.textContent = '📋'; btn.classList.remove('copied'); }, 1100);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ done(true); }).catch(function(){ done(false); });
+    } else {
+      try{
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        done(true);
+      } catch(e){ done(false); }
+    }
+  }
+
+  categories.forEach(function(cat){
+    var tier = tierOf(cat.ep);
+    var row = document.createElement('div');
+    row.className = 'cat-row tier-' + tier;
+    var crown = tier === 'mega' ? '<span class="tier-badge">👑</span>' : '';
+    row.innerHTML =
+      '<button class="cat-trigger" aria-expanded="false">'+
+        '<span class="cat-icon">'+cat.icon+'</span>'+
+        '<span class="cat-name">'+cat.name+'</span>'+
+        '<span class="cat-ep">'+crown+cat.ep+' EP</span>'+
+        '<svg class="cat-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>'+
+      '</button>'+
+      '<div class="cat-panel"><div class="cat-panel-in">'+
+        '<div class="ep-count-note">Showing all '+cat.ep+' endpoints · tap 📋 to copy a path</div>'+
+        cat.eps.map(function(p){
+          return '<span class="ep-line"><span class="ep-method">GET</span><span class="ep-path">'+p+'</span>'+
+                 '<button class="ep-copy" type="button" data-path="'+p+'" aria-label="Copy '+p+'">📋</button></span>';
+        }).join('')+
+      '</div></div>';
+    var trigger = row.querySelector('.cat-trigger');
+    trigger.addEventListener('click', function(){
+      var isOpen = row.classList.contains('open');
+      row.classList.toggle('open');
+      trigger.setAttribute('aria-expanded', String(!isOpen));
+    });
+    row.querySelectorAll('.ep-copy').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        copyText(btn.getAttribute('data-path'), btn);
+      });
+    });
+    catList.appendChild(row);
+  });
+
+  // ---------- sync premium stats (hero + section tag) from categories data ----------
+  document.getElementById('catSectionTag').textContent = categories.length + ' categories · ' + totalEp + '+ endpoints';
+  function countUp(el, target, duration){
+    var start = null;
+    function step(ts){
+      if(!start) start = ts;
+      var p = Math.min(1, (ts-start)/duration);
+      el.textContent = Math.floor(p*target).toLocaleString() + (p>=1 ? '+' : '');
+      if(p<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  countUp(document.getElementById('heroEpTotal'), totalEp, 1300);
+  countUp(document.getElementById('heroCatTotal'), categories.length, 900);
+
+  // ---------- top endpoint ranking ----------
+  var rankings = {
+    week:  [['/download/tiktok',38],['/ai/remove-bg',24],['/tools/qrcode',18]],
+    month: [['/ai/chat',31],['/download/instagram',27],['/search/lyrics',15]]
+  };
+  var rankList = document.getElementById('rankList');
+  function renderRank(range){
+    var data = rankings[range];
+    rankList.innerHTML = data.map(function(item, i){
+      return '<div class="rank-row">'+
+        '<span class="rank-num">0'+(i+1)+'</span>'+
+        '<div class="rank-bar-wrap">'+
+          '<div class="rank-path"><span>'+item[0]+'</span><span class="pct">'+item[1]+'%</span></div>'+
+          '<div class="rank-bar"><i style="width:'+item[1]+'%"></i></div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+  renderRank('week');
+  document.querySelectorAll('.seg button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.seg button').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      renderRank(btn.getAttribute('data-range'));
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
